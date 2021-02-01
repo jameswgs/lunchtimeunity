@@ -2,10 +2,10 @@
 {
     Properties
     {
-        _MainTex ("Texture", 2D) = "white" {}
-        _LightPow ("Light Pow", Range(1,100)) = 1
+        _MainTex("Texture", 2D) = "white" {}
+        _LightPow("Light Pow", Range(1,100)) = 1
         _Dim("Cloud Dimming", Range(0,5)) = 1
-        _Alpha("Cloud Alpha", Range(0,1)) = 0.5
+        _Alpha("Cloud Alpha", Range(0,5)) = 1
     }
     SubShader
     {
@@ -14,13 +14,13 @@
         LOD 100
 
         ZWrite Off
-        Blend SrcAlpha OneMinusSrcAlpha
+        Blend One OneMinusSrcAlpha
         // Blend SrcAlpha One
 
         Pass
         {
             CGPROGRAM
-            
+
             #pragma vertex vert
             #pragma fragment frag
 
@@ -45,7 +45,7 @@
             sampler2D _MainTex;
             float4 _MainTex_ST;
 
-            v2f vert (appdata v)
+            v2f vert(appdata v)
             {
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
@@ -60,10 +60,11 @@
                 float3 to_cam_dir = normalize(i.world_pos - _WorldSpaceCameraPos);
                 float adot = dot(_WorldSpaceLightPos0.xyz, to_cam_dir);
                 float apow = pow(adot, _LightPow);
-                float val = apow - _Dim;
-                fixed4 col = fixed4(val, val, val, _Alpha * tex_col.x);
+                float val = apow * tex_col.x * _Dim;
+                fixed4 col = fixed4(val, val, val, 1.0 - exp(-tex_col.x * _Alpha));
                 return col;
             }
+
             ENDCG
         }
     }
