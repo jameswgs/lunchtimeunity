@@ -4,8 +4,12 @@
     {
         _MainTex ("Texture", 2D) = "white" {}
         _CloudTexture ("Cloud Texture", 3D) = "white" {}
-        _CloudPosition ("Cloud Position", Vector) = (0,0,0,0)
-        _CloudScale ("Cloud Scale", Range(1, 128)) = 32.0
+        _CloudPosition("Cloud Position", Vector) = (0,0,0,0)
+        _CloudRadius("Cloud Radius", Range(1, 128)) = 32.0
+        _CloudScale("Cloud Scale", Range(1, 128)) = 32.0
+        _CloudThickness("Cloud Thickness", Range(0, 1)) = 0.1
+        _Steps("Ray Steps", Range(1, 256)) = 32
+        _CloudCol("Cloud Colour", Color) = (0,0,0,0)
     }
     SubShader
     {
@@ -51,34 +55,64 @@
                 return o;
             }
 
+            sampler2D _CameraDepthTexture;
             sampler2D _MainTex;
             sampler3D _CloudTexture;
             float4 _CloudPosition;
+            float _CloudRadius;
             float _CloudScale;
+            float _CloudThickness;
+            float4 _CloudCol;
+            int _Steps;
 
             fixed4 frag(v2f input) : SV_Target
             {
+                // the cam space depth
+                float zBuf = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, input.uv));
+                // the rendered colour to effect 
                 float3 srcCol = tex2D(_MainTex, input.uv).rgb;
 
                 float3 rayDir = normalize(input.viewVector);
                 float3 curPos = _WorldSpaceCameraPos;
+                float curDepth = 0;
                 float mul = 1.0f;
-                for (int i = 0; i < 32; i++)
+                for (int i = 0; i < _Steps; i++)
                 {
-                    float dist = ( tex3D(_CloudTexture, curPos * 0.01f).r - 0.5f ) / _CloudScale;
-                    if (dist < 0.5f)
+                    // if the ray hasn't intersected the rendered stuff
+                    if (curDepth < zBuf)
                     {
-                        mul *= 0.9f;
+                        float dist = ( tex3D(_CloudTexture, curPos / _CloudScale).r ) - _CloudRadius;
+                        float absDist = abs(dist);
+
+                        float step = absDist + 0.1f;
+
+                        // if we're inside 
+                        if (dist < 0.0f)
+                        {
+                            // reduce the final colour amount
+                            mul *= 1.0f - _CloudThickness;
+
+                            // step a small way through the cloud
+                            step = 0.01f;
+                        }
+                        else
+                        {
+                            // if we're outside
+                            // step a bit more than the towards the edge
+                            // so we don't end up right on the edge, but
+                            // either inside or outisde
+                            step = absDist + 0.1f;
+                        }
+
+                        curPos += rayDir * step;
+                        curDepth += step;
                     }
-                    curPos = curPos + rayDir * abs(dist);
                 }
 
-                return fixed4(srcCol * mul, 1);
+                float3 foggedCol = srcCol * mul;
 
-                //minDist = clamp(minDist, 0, 1);
-                //float dist = length(curPos - _WorldSpaceCameraPos);
-                ////return fixed4(dist, dist, dist, 1);
-                //return fixed4(col * minDist + invCol * (1.0f - minDist), 1);
+                return fixed4(srcCol * mul + _CloudCol * (1 - mul), 1);
+
             }
             ENDCG
         }

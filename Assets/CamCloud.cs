@@ -19,6 +19,8 @@ public class CamCloud : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        GetComponent<Camera>().depthTextureMode = DepthTextureMode.Depth;
+
         int kernel = computeShader.FindKernel("GenSdf");
         int resultId = Shader.PropertyToID("Result");
         int centresId = Shader.PropertyToID("Centres");

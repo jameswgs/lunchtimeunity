@@ -44,6 +44,7 @@ void GenSdf(uint3 id : SV_DispatchThreadID)
         dist = min(dist, length(id - Centres[i] + float3(-Size.x, Size.y, 0)));
         dist = min(dist, length(id - Centres[i] + float3(-Size.x, Size.y, Size.z)));
     }
+
     // dist /= max; // normalise to 1.0f = max dist on texture
     // dist = 1.0f - dist; // invert 
     Result[id.xyz] = float4(dist, dist, dist, 1);
