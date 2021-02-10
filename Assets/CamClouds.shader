@@ -3,7 +3,9 @@
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
+        _CloudTexture ("Cloud Texture", 3D) = "white" {}
         _CloudPosition ("Cloud Position", Vector) = (0,0,0,0)
+        _CloudScale ("Cloud Scale", Range(1, 128)) = 32.0
     }
     SubShader
     {
@@ -50,25 +52,33 @@
             }
 
             sampler2D _MainTex;
+            sampler3D _CloudTexture;
             float4 _CloudPosition;
+            float _CloudScale;
 
-            fixed4 frag (v2f input) : SV_Target
+            fixed4 frag(v2f input) : SV_Target
             {
-                float3 col = tex2D(_MainTex, input.uv).xyz;
-                float3 invCol = 1 - col.rgb;
+                float3 srcCol = tex2D(_MainTex, input.uv).rgb;
+
                 float3 rayDir = normalize(input.viewVector);
-                float minDist = 1.0f;
                 float3 curPos = _WorldSpaceCameraPos;
-                for (int i = 0; i < 8; i++)
+                float mul = 1.0f;
+                for (int i = 0; i < 32; i++)
                 {
-                    float dist = sdSphere(curPos, _CloudPosition.xyz, 0.5f);
-                    minDist = min(minDist, dist);
+                    float dist = ( tex3D(_CloudTexture, curPos * 0.01f).r - 0.5f ) / _CloudScale;
+                    if (dist < 0.5f)
+                    {
+                        mul *= 0.9f;
+                    }
                     curPos = curPos + rayDir * abs(dist);
                 }
-                minDist = clamp(minDist, 0, 1);
-                float dist = length(curPos - _WorldSpaceCameraPos);
-                //return fixed4(dist, dist, dist, 1);
-                return fixed4(col * minDist + invCol * (1.0f - minDist), 1);
+
+                return fixed4(srcCol * mul, 1);
+
+                //minDist = clamp(minDist, 0, 1);
+                //float dist = length(curPos - _WorldSpaceCameraPos);
+                ////return fixed4(dist, dist, dist, 1);
+                //return fixed4(col * minDist + invCol * (1.0f - minDist), 1);
             }
             ENDCG
         }

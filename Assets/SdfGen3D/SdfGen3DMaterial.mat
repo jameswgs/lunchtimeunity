@@ -67,12 +67,12 @@ Material:
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
-    - _SdfScale: 1
-    - _SdfScale0: 1
-    - _SdfScale1: 1
-    - _SdfScale2: 1
-    - _SdfScale3: 1
-    - _SdfScale4: 1
+    - _SdfScale: 1.044
+    - _SdfScale0: 21.9
+    - _SdfScale1: 39.4
+    - _SdfScale2: 37.9
+    - _SdfScale3: 37.7
+    - _SdfScale4: 34.1
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
