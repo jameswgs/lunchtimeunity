@@ -30,6 +30,7 @@
             {
                 float2 uv : TEXCOORD0;
                 float4 vertex : SV_POSITION;
+                float4 worldPos : TEXCOORD1;
             };
 
             sampler2D _MainTex;
@@ -41,13 +42,14 @@
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 o.uv = TRANSFORM_TEX(v.uv, _MainTex);
+                o.worldPos = mul(unity_ObjectToWorld, v.vertex);
                 return o;
             }
 
             fixed4 frag(v2f i) : SV_Target
             {
                 // sample the texture
-                float3 inv = float3(1.0f, 1.0f, 1.0f) - (tex2D(_MainTex, i.uv).xyz / _SdfScale);
+                float3 inv = float3(1.0f, 1.0f, 1.0f) - (tex2D(_MainTex, i.worldPos.xy).xyz / _SdfScale);
                 fixed4 col = fixed4(inv, 1.0f);
                 return col;
             }
