@@ -10,6 +10,8 @@
         _CloudThickness("Cloud Thickness", Range(0, 1)) = 0.1
         _Steps("Ray Steps", Range(1, 256)) = 32
         _CloudCol("Cloud Colour", Color) = (0,0,0,0)
+        _InCloudStep("In Cloud Step", Range(0.005, 1.0)) = 0.01
+        _MaxDepth("Maximum Depth", Range(1, 1024)) = 1024
     }
     SubShader
     {
@@ -64,6 +66,8 @@
             float _CloudThickness;
             float4 _CloudCol;
             int _Steps;
+            float _InCloudStep;
+            float _MaxDepth;
 
             fixed4 frag(v2f input) : SV_Target
             {
@@ -76,10 +80,11 @@
                 float3 curPos = _WorldSpaceCameraPos;
                 float curDepth = 0;
                 float mul = 1.0f;
+                float invPerStepThickness = 1.0f - (_CloudThickness * _InCloudStep);
                 for (int i = 0; i < _Steps; i++)
                 {
                     // if the ray hasn't intersected the rendered stuff
-                    if (curDepth < zBuf)
+                    if (curDepth < zBuf && curDepth < _MaxDepth)
                     {
                         float dist = ( tex3D(_CloudTexture, curPos / _CloudScale).r ) - _CloudRadius;
                         float absDist = abs(dist);
@@ -90,10 +95,10 @@
                         if (dist < 0.0f)
                         {
                             // reduce the final colour amount
-                            mul *= 1.0f - _CloudThickness;
+                            mul *= invPerStepThickness;
 
                             // step a small way through the cloud
-                            step = 0.01f;
+                            step = _InCloudStep;
                         }
                         else
                         {
