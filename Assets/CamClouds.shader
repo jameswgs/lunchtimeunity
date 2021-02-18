@@ -4,7 +4,6 @@
     {
         _MainTex ("Texture", 2D) = "white" {}
         _CloudTexture ("Cloud Texture", 3D) = "white" {}
-        _CloudPosition("Cloud Position", Vector) = (0,0,0,0)
         _CloudRadius("Cloud Radius", Range(-128, 128)) = 0.0
         _CloudScale("Cloud Scale", Range(1, 1024)) = 32.0
         _CloudThickness("Cloud Thickness", Range(0, 1)) = 0.1
@@ -60,7 +59,6 @@
             sampler2D _CameraDepthTexture;
             sampler2D _MainTex;
             sampler3D _CloudTexture;
-            float4 _CloudPosition;
             float _CloudRadius;
             float _CloudScale;
             float _CloudThickness;
