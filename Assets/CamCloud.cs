@@ -6,8 +6,9 @@ public class CamCloud : MonoBehaviour
 {
     public Material mat;
     public GameObject cloud;
-
     public ComputeShader computeShader;
+    public float CloudSize = 20.0f;
+    public int CloudOctaves = 4;
 
     private RenderTexture renderTexture;
 
@@ -19,6 +20,11 @@ public class CamCloud : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        GenClouds();
+    }
+
+    public void GenClouds()
+    { 
         GetComponent<Camera>().depthTextureMode = DepthTextureMode.Depth;
 
         int kernel = computeShader.FindKernel("GenSdf");
@@ -50,6 +56,8 @@ public class CamCloud : MonoBehaviour
         computeShader.SetVector(sizeId, new Vector4(Width, Height, Depth, 0));
         computeShader.SetTexture(kernel, resultId, renderTexture);
         computeShader.SetInt(numCentresId, centres.Length);
+        computeShader.SetInt(Shader.PropertyToID("NumOctaves"), CloudOctaves);
+        computeShader.SetFloat(Shader.PropertyToID("BaseRadius"), CloudSize);
         computeShader.Dispatch(kernel, Width / 8, Height / 8, Depth / 8);
 
         buffer.Dispose();

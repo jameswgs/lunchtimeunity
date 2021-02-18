@@ -5,8 +5,8 @@
         _MainTex ("Texture", 2D) = "white" {}
         _CloudTexture ("Cloud Texture", 3D) = "white" {}
         _CloudPosition("Cloud Position", Vector) = (0,0,0,0)
-        _CloudRadius("Cloud Radius", Range(1, 128)) = 32.0
-        _CloudScale("Cloud Scale", Range(1, 128)) = 32.0
+        _CloudRadius("Cloud Radius", Range(-128, 128)) = 0.0
+        _CloudScale("Cloud Scale", Range(1, 1024)) = 32.0
         _CloudThickness("Cloud Thickness", Range(0, 1)) = 0.1
         _Steps("Ray Steps", Range(1, 256)) = 32
         _CloudCol("Cloud Colour", Color) = (0,0,0,0)
@@ -89,7 +89,7 @@
                         float dist = ( tex3D(_CloudTexture, curPos / _CloudScale).r ) - _CloudRadius;
                         float absDist = abs(dist);
 
-                        float step = absDist + 0.1f;
+                        float step;
 
                         // if we're inside 
                         if (dist < 0.0f)
