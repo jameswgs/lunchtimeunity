@@ -61,7 +61,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Floats:
     - _BumpScale: 1
-    - _CloudRadius: 0.1
+    - _CloudRadius: 0
     - _CloudRadius0: 8.7
     - _CloudRadius1: 8.9
     - _CloudScale: 1024

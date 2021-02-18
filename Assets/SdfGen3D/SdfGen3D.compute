@@ -8,53 +8,57 @@ float4 Size;
 float BaseRadius;
 
 [numthreads(8, 8, 8)]
-void GenSdf(uint3 id : SV_DispatchThreadID)
+void GenSdf(uint3 pos : SV_DispatchThreadID)
 {
     float max = length(Size);
-    float octaveScale = 1.0f;
+    float curOctaveScale = 1.0f;
     float dist = 0.0f;
     for (int octave = 0; octave < NumOctaves; octave++) {
-        float3 pos = fmod(id * octaveScale, Size.xyz);
-        float radius = BaseRadius / octaveScale;
+        float3 curOctavePos = fmod(pos * curOctaveScale, Size.xyz);
+        float radius = BaseRadius / curOctaveScale;
         float curDist = max;
         for (int i = 0; i < NumCentres; i++) {
+            // to make the SDF tile in three dimensions we effectively replicate
+            // all the centres in all 3d directions, so there's 3*3*3 cubes with
+            // a duplicated set of centres in.
+
             // pos x layer
-            curDist = min(curDist, length(pos - Centres[i] + float3(Size.x, -Size.y, -Size.z)) - radius);
-            curDist = min(curDist, length(pos - Centres[i] + float3(Size.x, -Size.y, 0)) - radius);
-            curDist = min(curDist, length(pos - Centres[i] + float3(Size.x, -Size.y, Size.z)) - radius);
-            curDist = min(curDist, length(pos - Centres[i] + float3(Size.x, 0, -Size.x)) - radius);
-            curDist = min(curDist, length(pos - Centres[i] + float3(Size.x, 0, 0)) - radius);
-            curDist = min(curDist, length(pos - Centres[i] + float3(Size.x, 0, Size.z)) - radius);
-            curDist = min(curDist, length(pos - Centres[i] + float3(Size.x, Size.y, -Size.z)) - radius);
-            curDist = min(curDist, length(pos - Centres[i] + float3(Size.x, Size.y, 0)) - radius);
-            curDist = min(curDist, length(pos - Centres[i] + float3(Size.x, Size.y, Size.z)) - radius);
+            curDist = min(curDist, length(curOctavePos - Centres[i] + float3(Size.x, -Size.y, -Size.z)) - radius);
+            curDist = min(curDist, length(curOctavePos - Centres[i] + float3(Size.x, -Size.y, 0)) - radius);
+            curDist = min(curDist, length(curOctavePos - Centres[i] + float3(Size.x, -Size.y, Size.z)) - radius);
+            curDist = min(curDist, length(curOctavePos - Centres[i] + float3(Size.x, 0, -Size.x)) - radius);
+            curDist = min(curDist, length(curOctavePos - Centres[i] + float3(Size.x, 0, 0)) - radius);
+            curDist = min(curDist, length(curOctavePos - Centres[i] + float3(Size.x, 0, Size.z)) - radius);
+            curDist = min(curDist, length(curOctavePos - Centres[i] + float3(Size.x, Size.y, -Size.z)) - radius);
+            curDist = min(curDist, length(curOctavePos - Centres[i] + float3(Size.x, Size.y, 0)) - radius);
+            curDist = min(curDist, length(curOctavePos - Centres[i] + float3(Size.x, Size.y, Size.z)) - radius);
 
             // 0 x layer
-            curDist = min(curDist, length(pos - Centres[i] + float3(0, -Size.y, -Size.z)) - radius);
-            curDist = min(curDist, length(pos - Centres[i] + float3(0, -Size.y, 0)) - radius);
-            curDist = min(curDist, length(pos - Centres[i] + float3(0, -Size.y, Size.z)) - radius);
-            curDist = min(curDist, length(pos - Centres[i] + float3(0, 0, -Size.x)) - radius);
-            curDist = min(curDist, length(pos - Centres[i] + float3(0, 0, 0)) - radius);
-            curDist = min(curDist, length(pos - Centres[i] + float3(0, 0, Size.z)) - radius);
-            curDist = min(curDist, length(pos - Centres[i] + float3(0, Size.y, -Size.z)) - radius);
-            curDist = min(curDist, length(pos - Centres[i] + float3(0, Size.y, 0)) - radius);
-            curDist = min(curDist, length(pos - Centres[i] + float3(0, Size.y, Size.z)) - radius);
+            curDist = min(curDist, length(curOctavePos - Centres[i] + float3(0, -Size.y, -Size.z)) - radius);
+            curDist = min(curDist, length(curOctavePos - Centres[i] + float3(0, -Size.y, 0)) - radius);
+            curDist = min(curDist, length(curOctavePos - Centres[i] + float3(0, -Size.y, Size.z)) - radius);
+            curDist = min(curDist, length(curOctavePos - Centres[i] + float3(0, 0, -Size.x)) - radius);
+            curDist = min(curDist, length(curOctavePos - Centres[i] + float3(0, 0, 0)) - radius);
+            curDist = min(curDist, length(curOctavePos - Centres[i] + float3(0, 0, Size.z)) - radius);
+            curDist = min(curDist, length(curOctavePos - Centres[i] + float3(0, Size.y, -Size.z)) - radius);
+            curDist = min(curDist, length(curOctavePos - Centres[i] + float3(0, Size.y, 0)) - radius);
+            curDist = min(curDist, length(curOctavePos - Centres[i] + float3(0, Size.y, Size.z)) - radius);
 
             // neg x layer
-            curDist = min(curDist, length(pos - Centres[i] + float3(-Size.x, -Size.y, -Size.z)) - radius);
-            curDist = min(curDist, length(pos - Centres[i] + float3(-Size.x, -Size.y, 0)) - radius);
-            curDist = min(curDist, length(pos - Centres[i] + float3(-Size.x, -Size.y, Size.z)) - radius);
-            curDist = min(curDist, length(pos - Centres[i] + float3(-Size.x, 0, -Size.x)) - radius);
-            curDist = min(curDist, length(pos - Centres[i] + float3(-Size.x, 0, 0)) - radius);
-            curDist = min(curDist, length(pos - Centres[i] + float3(-Size.x, 0, Size.z)) - radius);
-            curDist = min(curDist, length(pos - Centres[i] + float3(-Size.x, Size.y, -Size.z)) - radius);
-            curDist = min(curDist, length(pos - Centres[i] + float3(-Size.x, Size.y, 0)) - radius);
-            curDist = min(curDist, length(pos - Centres[i] + float3(-Size.x, Size.y, Size.z)) - radius);
+            curDist = min(curDist, length(curOctavePos - Centres[i] + float3(-Size.x, -Size.y, -Size.z)) - radius);
+            curDist = min(curDist, length(curOctavePos - Centres[i] + float3(-Size.x, -Size.y, 0)) - radius);
+            curDist = min(curDist, length(curOctavePos - Centres[i] + float3(-Size.x, -Size.y, Size.z)) - radius);
+            curDist = min(curDist, length(curOctavePos - Centres[i] + float3(-Size.x, 0, -Size.x)) - radius);
+            curDist = min(curDist, length(curOctavePos - Centres[i] + float3(-Size.x, 0, 0)) - radius);
+            curDist = min(curDist, length(curOctavePos - Centres[i] + float3(-Size.x, 0, Size.z)) - radius);
+            curDist = min(curDist, length(curOctavePos - Centres[i] + float3(-Size.x, Size.y, -Size.z)) - radius);
+            curDist = min(curDist, length(curOctavePos - Centres[i] + float3(-Size.x, Size.y, 0)) - radius);
+            curDist = min(curDist, length(curOctavePos - Centres[i] + float3(-Size.x, Size.y, Size.z)) - radius);
         }
-        octaveScale *= 2.0f;
+        curOctaveScale *= 2.0f;
         dist += curDist;
     }
 
-    Result[id.xyz] = float4(dist, dist, dist, 1);
+    Result[pos.xyz] = float4(dist, dist, dist, 1);
 
 }

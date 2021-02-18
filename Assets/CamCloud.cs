@@ -49,10 +49,10 @@ public class CamCloud : MonoBehaviour
 
         Vector3[] centres = centresList.ToArray();
 
-        ComputeBuffer buffer = new ComputeBuffer(centres.Length, sizeof(float) * 3);
-        buffer.SetData(centres);
+        ComputeBuffer centresBuffer = new ComputeBuffer(centres.Length, sizeof(float) * 3);
+        centresBuffer.SetData(centres);
 
-        computeShader.SetBuffer(kernel, centresId, buffer);
+        computeShader.SetBuffer(kernel, centresId, centresBuffer);
         computeShader.SetVector(sizeId, new Vector4(Width, Height, Depth, 0));
         computeShader.SetTexture(kernel, resultId, renderTexture);
         computeShader.SetInt(numCentresId, centres.Length);
@@ -60,7 +60,7 @@ public class CamCloud : MonoBehaviour
         computeShader.SetFloat(Shader.PropertyToID("BaseRadius"), CloudSize);
         computeShader.Dispatch(kernel, Width / 8, Height / 8, Depth / 8);
 
-        buffer.Dispose();
+        centresBuffer.Dispose();
     }
 
 

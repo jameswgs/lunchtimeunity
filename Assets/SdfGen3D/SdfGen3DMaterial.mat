@@ -67,9 +67,9 @@ Material:
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
-    - _SdfScale: 0.173
-    - _SdfScale0: 61.4
-    - _SdfScale1: 62.4
+    - _SdfScale: 0.403
+    - _SdfScale0: 75.9
+    - _SdfScale1: 56.7
     - _SdfScale2: 67.7
     - _SdfScale3: 72.4
     - _SdfScale4: 72.5
