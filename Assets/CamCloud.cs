@@ -27,12 +27,6 @@ public class CamCloud : MonoBehaviour
     { 
         GetComponent<Camera>().depthTextureMode = DepthTextureMode.Depth;
 
-        int kernel = computeShader.FindKernel("GenSdf");
-        int resultId = Shader.PropertyToID("Result");
-        int centresId = Shader.PropertyToID("Centres");
-        int numCentresId = Shader.PropertyToID("NumCentres");
-        int sizeId = Shader.PropertyToID("Size");
-
         renderTexture = new RenderTexture(Width, Height, 0, RenderTextureFormat.ARGBFloat);
         renderTexture.dimension = UnityEngine.Rendering.TextureDimension.Tex3D;
         renderTexture.volumeDepth = Depth;
@@ -52,17 +46,17 @@ public class CamCloud : MonoBehaviour
         ComputeBuffer centresBuffer = new ComputeBuffer(centres.Length, sizeof(float) * 3);
         centresBuffer.SetData(centres);
 
-        computeShader.SetBuffer(kernel, centresId, centresBuffer);
-        computeShader.SetVector(sizeId, new Vector4(Width, Height, Depth, 0));
-        computeShader.SetTexture(kernel, resultId, renderTexture);
-        computeShader.SetInt(numCentresId, centres.Length);
+        int kernel = computeShader.FindKernel("GenSdf");
+        computeShader.SetBuffer(kernel, Shader.PropertyToID("Centres"), centresBuffer);
+        computeShader.SetVector(Shader.PropertyToID("Size"), new Vector4(Width, Height, Depth, 0));
+        computeShader.SetTexture(kernel, Shader.PropertyToID("Result"), renderTexture);
+        computeShader.SetInt(Shader.PropertyToID("NumCentres"), centres.Length);
         computeShader.SetInt(Shader.PropertyToID("NumOctaves"), CloudOctaves);
         computeShader.SetFloat(Shader.PropertyToID("BaseRadius"), CloudSize);
         computeShader.Dispatch(kernel, Width / 8, Height / 8, Depth / 8);
 
         centresBuffer.Dispose();
     }
-
 
     void OnRenderImage(RenderTexture src, RenderTexture dest)
     {
