@@ -14,49 +14,34 @@ void GenSdf(uint3 pos : SV_DispatchThreadID)
     float octaveScale = 1.0f;
     float dist = 0.0f;
     for (int octave = 0; octave < NumOctaves; octave++) {
+        // multiply the position by the octave to scale it up
+        // but fmod wrap around at the edge
         float3 octavePos = fmod(pos * octaveScale, Size.xyz);
-        float octaveRadius = BaseRadius / octaveScale;
         float octaveDist = max;
         for (int i = 0; i < NumCentres; i++) {
             // to make the SDF tile in three dimensions we effectively replicate
-            // all the centres in all 3d directions, so there's 3*3*3 cubes with
+            // all the centres in all 26 surrouding cubes, so there's 3*3*3 cubes with
             // a duplicated set of centres in.
 
-            // pos x layer
-            octaveDist = min(octaveDist, length(octavePos - Centres[i] + float3(Size.x, -Size.y, -Size.z)) - octaveRadius);
-            octaveDist = min(octaveDist, length(octavePos - Centres[i] + float3(Size.x, -Size.y, 0)) - octaveRadius);
-            octaveDist = min(octaveDist, length(octavePos - Centres[i] + float3(Size.x, -Size.y, Size.z)) - octaveRadius);
-            octaveDist = min(octaveDist, length(octavePos - Centres[i] + float3(Size.x, 0, -Size.x)) - octaveRadius);
-            octaveDist = min(octaveDist, length(octavePos - Centres[i] + float3(Size.x, 0, 0)) - octaveRadius);
-            octaveDist = min(octaveDist, length(octavePos - Centres[i] + float3(Size.x, 0, Size.z)) - octaveRadius);
-            octaveDist = min(octaveDist, length(octavePos - Centres[i] + float3(Size.x, Size.y, -Size.z)) - octaveRadius);
-            octaveDist = min(octaveDist, length(octavePos - Centres[i] + float3(Size.x, Size.y, 0)) - octaveRadius);
-            octaveDist = min(octaveDist, length(octavePos - Centres[i] + float3(Size.x, Size.y, Size.z)) - octaveRadius);
+            float3 dist11 = octavePos - Centres[i];
 
-            // 0 x layer
-            octaveDist = min(octaveDist, length(octavePos - Centres[i] + float3(0, -Size.y, -Size.z)) - octaveRadius);
-            octaveDist = min(octaveDist, length(octavePos - Centres[i] + float3(0, -Size.y, 0)) - octaveRadius);
-            octaveDist = min(octaveDist, length(octavePos - Centres[i] + float3(0, -Size.y, Size.z)) - octaveRadius);
-            octaveDist = min(octaveDist, length(octavePos - Centres[i] + float3(0, 0, -Size.x)) - octaveRadius);
-            octaveDist = min(octaveDist, length(octavePos - Centres[i] + float3(0, 0, 0)) - octaveRadius);
-            octaveDist = min(octaveDist, length(octavePos - Centres[i] + float3(0, 0, Size.z)) - octaveRadius);
-            octaveDist = min(octaveDist, length(octavePos - Centres[i] + float3(0, Size.y, -Size.z)) - octaveRadius);
-            octaveDist = min(octaveDist, length(octavePos - Centres[i] + float3(0, Size.y, 0)) - octaveRadius);
-            octaveDist = min(octaveDist, length(octavePos - Centres[i] + float3(0, Size.y, Size.z)) - octaveRadius);
-
-            // neg x layer
-            octaveDist = min(octaveDist, length(octavePos - Centres[i] + float3(-Size.x, -Size.y, -Size.z)) - octaveRadius);
-            octaveDist = min(octaveDist, length(octavePos - Centres[i] + float3(-Size.x, -Size.y, 0)) - octaveRadius);
-            octaveDist = min(octaveDist, length(octavePos - Centres[i] + float3(-Size.x, -Size.y, Size.z)) - octaveRadius);
-            octaveDist = min(octaveDist, length(octavePos - Centres[i] + float3(-Size.x, 0, -Size.x)) - octaveRadius);
-            octaveDist = min(octaveDist, length(octavePos - Centres[i] + float3(-Size.x, 0, 0)) - octaveRadius);
-            octaveDist = min(octaveDist, length(octavePos - Centres[i] + float3(-Size.x, 0, Size.z)) - octaveRadius);
-            octaveDist = min(octaveDist, length(octavePos - Centres[i] + float3(-Size.x, Size.y, -Size.z)) - octaveRadius);
-            octaveDist = min(octaveDist, length(octavePos - Centres[i] + float3(-Size.x, Size.y, 0)) - octaveRadius);
-            octaveDist = min(octaveDist, length(octavePos - Centres[i] + float3(-Size.x, Size.y, Size.z)) - octaveRadius);
+            for (int x = -1; x <= 1; x++)
+            {
+                float fx = x * Size.x;
+                for (int y = -1; y <= 1; y++)
+                {
+                    float fy = y * Size.y;
+                    for (int z = -1; z <= 1; z++)
+                    {
+                        float fz = z * Size.z;
+                        octaveDist = min(octaveDist, length(dist11 + float3(fx, fy, fz)) - BaseRadius);
+                    }
+                }
+            }
         }
+        dist += octaveDist / octaveScale;
         octaveScale *= 2.0f;
-        dist += octaveDist;
+        
     }
 
     Result[pos.xyz] = float4(dist, dist, dist, 1);
