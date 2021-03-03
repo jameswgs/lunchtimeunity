@@ -38,7 +38,7 @@ public class FlyCamera : MonoBehaviour
         //Keyboard commands
         float f = 0.0f;
         Vector3 p = GetBaseInput();
-        if (Input.GetKey(KeyCode.LeftShift))
+        if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.Semicolon))
         {
             totalRun += Time.deltaTime;
             p = p * totalRun * shiftAdd;
@@ -71,19 +71,19 @@ public class FlyCamera : MonoBehaviour
     private Vector3 GetBaseInput()
     { //returns the basic values, if it's 0 than it's not active.
         Vector3 p_Velocity = new Vector3();
-        if (Input.GetKey(KeyCode.W))
+        if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.I))
         {
             p_Velocity += new Vector3(0, 0, 1);
         }
-        if (Input.GetKey(KeyCode.S))
+        if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.K))
         {
             p_Velocity += new Vector3(0, 0, -1);
         }
-        if (Input.GetKey(KeyCode.A))
+        if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.J))
         {
             p_Velocity += new Vector3(-1, 0, 0);
         }
-        if (Input.GetKey(KeyCode.D))
+        if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.L))
         {
             p_Velocity += new Vector3(1, 0, 0);
         }

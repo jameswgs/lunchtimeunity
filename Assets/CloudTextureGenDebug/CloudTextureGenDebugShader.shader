@@ -52,9 +52,9 @@
                 colf = tex3D(_MainTex, i.worldPos.xyz).x;
                 float s = sign(colf) * _DistScale;
                 float r = max(0, s) * colf;
-                float g = max(0, -s) * -colf;
+                float b = max(0, -s) * -colf;
 
-                return fixed4(r, g, 0, 1.0f);
+                return fixed4(r, 0, b, 1.0f);
             }
                 
             ENDCG

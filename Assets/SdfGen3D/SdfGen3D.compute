@@ -5,9 +5,11 @@ StructuredBuffer<float3> Centres;
 int NumCentres;
 int NumOctaves;
 float4 Size;
-float BaseRadius;
+float BaseRadius = 1;
 
 [numthreads(8, 8, 8)]
+
+// GenSdf: Calculate distance from pos to nearest centre
 void GenSdf(uint3 pos : SV_DispatchThreadID)
 {
     float max = length(Size);
