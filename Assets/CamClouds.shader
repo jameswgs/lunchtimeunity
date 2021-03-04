@@ -11,6 +11,8 @@
         _CloudCol("Cloud Colour", Color) = (0,0,0,0)
         _InCloudStep("In Cloud Step", Range(0.005, 1.0)) = 0.01
         _MaxDepth("Maximum Depth", Range(1, 1024)) = 1024
+        _NormalEpsilon("Normal Epsilon", Range(0.1, 20)) = 5
+        _SurfaceNormalBlend("Surface Normal Blend", Range(0, 1)) = 0
     }
     SubShader
     {
@@ -38,11 +40,6 @@
                 float3 viewVector: TEXCOORD1;
             };
 
-//            float sdSphere(float3 p, float3 sp, float sr)
-//            {
-//                return length(p-sp) - sr;
-//            }
-
             v2f vert (appdata v)
             {
                 v2f o;
@@ -66,6 +63,8 @@
             int _Steps;
             float _InCloudStep;
             float _MaxDepth;
+            float _NormalEpsilon;
+            int _SurfaceNormalBlend;
 
             float sceneSDF(float3 pos)
             {
@@ -73,7 +72,7 @@
             }
 
             float3 estimateNormal(float3 p) {
-                float EPSILON = 5.0f;
+                float EPSILON = _NormalEpsilon;
                 return normalize(float3(
                     sceneSDF(float3(p.x + EPSILON, p.y, p.z)) - sceneSDF(float3(p.x - EPSILON, p.y, p.z)),
                     sceneSDF(float3(p.x, p.y + EPSILON, p.z)) - sceneSDF(float3(p.x, p.y - EPSILON, p.z)),
@@ -90,17 +89,17 @@
 
                 float3 rayDir = normalize(input.viewVector);
                 float3 curPos = _WorldSpaceCameraPos;
-                float3 surfacePos;
+                float3 surfaceNormalCol;
                 float curDepth = 0;
                 float mul = 1.0f;
                 float invPerStepThickness = 1.0f - (_CloudThickness * _InCloudStep);
-                float firstDepth = 0.f;
+                bool insideSDF = false;
                 for (int i = 0; i < _Steps; i++)
                 {
                     // if the ray hasn't intersected the rendered stuff
                     if (curDepth < zBuf && curDepth < _MaxDepth)
                     {
-                        float dist = sceneSDF(curPos);//( tex3D(_CloudTexture, curPos / _CloudScale).r ) - _CloudRadius;
+                        float dist = sceneSDF(curPos);
                         float absDist = abs(dist);
 
                         float step;
@@ -108,10 +107,10 @@
                         // if we're inside 
                         if (dist < 0.0f)
                         {
-                            if (firstDepth < 0.01f)
+                            if (!insideSDF)
                             {
-                                firstDepth = curDepth;
-                                surfacePos = curPos;
+                                insideSDF = true;
+                                surfaceNormalCol = (estimateNormal(curPos) + float3(1.0, 1.0, 1.0)) * 0.5f;
                             }
                             // reduce the final colour amount
                             mul *= invPerStepThickness;
@@ -133,9 +132,21 @@
                     }
                 }
 
-                float3 surfaceNormalCol = (estimateNormal(surfacePos) + float3(1.0, 1.0, 1.0)) * 0.5f;
-                return fixed4(srcCol * mul + surfaceNormalCol * (1 - mul), 1);
-
+                // Show debug normals?
+                if (_SurfaceNormalBlend)
+                {
+                    if (insideSDF)
+                    {
+                        return fixed4(surfaceNormalCol, 1);
+                    }
+                    else
+                        return fixed4(srcCol, 1);
+                }
+                else
+                {
+                    // Regular rendering path
+                    return fixed4(srcCol * mul + _CloudCol * (1 - mul), 1);
+                }
             }
             ENDCG
         }
