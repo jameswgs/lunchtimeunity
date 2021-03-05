@@ -61,13 +61,13 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Floats:
     - _BumpScale: 1
-    - _CloudRadius: 0.8
+    - _CloudRadius: 0
     - _CloudRadius0: 8.7
     - _CloudRadius1: 8.9
-    - _CloudScale: 1024
+    - _CloudScale: 347
     - _CloudScale0: 128
     - _CloudScale1: 128
-    - _CloudThickness: 0.033
+    - _CloudThickness: 0.008
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
@@ -78,16 +78,24 @@ Material:
     - _MaxDepth: 1024
     - _Metallic: 0
     - _Mode: 0
+    - _Monkey: 0
+    - _NormalEpsilon: 5.5
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
-    - _Steps: 170.2
+    - _Steps: 256
+    - _SunSteps: 16
+    - _SurfaceNormalBlend: 0.12
+    - _SurfaceNormals: 0
     - _UVSec: 0
     - _ZWrite: 1
     m_Colors:
-    - _CloudCol: {r: 0.254717, g: 0, b: 0, a: 0}
+    - _BoundsMax: {r: 50, g: 104.4, b: 5000, a: 0}
+    - _BoundsMin: {r: -50, g: 4.4000015, b: -5000, a: 0}
+    - _CloudCol: {r: 0.6226415, g: 0, b: 0.40009463, a: 0}
     - _CloudPosition: {r: 0.13, g: 1.141, b: 0, a: 0}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _SunDir: {r: 0, g: 1, b: 0, a: 1}

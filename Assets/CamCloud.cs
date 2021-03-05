@@ -6,6 +6,7 @@ public class CamCloud : MonoBehaviour
 {
     public Material material;
     public ComputeShader computeShader;
+    public Transform container;
     public int numCentres = 128;
     public float cloudSize = 20.0f;
     public int cloudOctaves = 4;
@@ -30,6 +31,8 @@ public class CamCloud : MonoBehaviour
 
     void OnRenderImage(RenderTexture src, RenderTexture dest)
     {
+        material.SetVector("_BoundsMin", container.position - container.localScale / 2);
+        material.SetVector("_BoundsMax", container.position + container.localScale / 2);
         Graphics.Blit(src, dest, material);
     }
 
